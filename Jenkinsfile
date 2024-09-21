@@ -14,27 +14,27 @@ pipeline {
         stage("Clone code from GitHub") {
             steps {
                 script {
-                    git branch: 'main', url: 'https://github.com/nghia4490/jenkins-maven';
+                    git branch: 'main', url: 'https://github.com/devopshint/jenkins-nexus'
                 }
             }
         }
         stage("Maven Build") {
             steps {
                 script {
-                    sh "mvn package -DskipTests=true"
+                    bat "mvn package -DskipTests=true" // Sử dụng bat nếu chạy trên Windows
                 }
             }
         }
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    pom = readMavenPom file: "pom.xml"
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
+                    artifactPath = filesByGlob[0].path
+                    artifactExists = fileExists artifactPath
                     if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}"
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION,
                             protocol: NEXUS_PROTOCOL,
@@ -53,9 +53,9 @@ pipeline {
                                 file: "pom.xml",
                                 type: "pom"]
                             ]
-                        );
+                        )
                     } else {
-                        error "*** File: ${artifactPath}, could not be found";
+                        error "*** File: ${artifactPath}, could not be found"
                     }
                 }
             }
